@@ -190,13 +190,15 @@ classDiagram
 - Async / Parallel Processing
 - Azure WebJobs
 - Webhook APIs
+- AWS Lambda
 
 ### Integration
 - EDI (X12 837 / 277 / 835)
 - Stedi API (JSON artifacts)
 
 ### Database
-- SQL Server
+- MySQL Server
+- DynamoDB Server
 - Indexed deduplication keys
 - Immutable history model
 
