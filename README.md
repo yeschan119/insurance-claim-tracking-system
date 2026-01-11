@@ -40,6 +40,9 @@ into a **single, traceable claim timeline**.
 - UI responsibilities were **split by feature domain**
   - Claim submission & overview screens
   - Status timeline & payment views
+  - UI example(one of the whole system)
+  - <img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
+
 - Backend APIs were designed to support both UI segments consistently
 
 ---
