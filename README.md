@@ -6,239 +6,233 @@
 
 ## Project Overview
 
-This project is an **insurance claim lifecycle tracking and reconciliation system** designed to reliably manage medical claim submissions, adjudication status updates, and payment processing.
+This project is a large-scale **Insurance Claim Lifecycle Tracking & Monitoring System** built on top of the Stedi EDI platform.
 
 The system integrates:
 
 - **837 (Claim Submission)**
-- **277 (Claim Status)**
+- **277 (Claim Status Update)**
 - **835 (ERA Payment)**
 
-into a **single, traceable and immutable claim timeline**.
-
-The goal of the system is to guarantee:
+into a unified lifecycle timeline that enables:
 
 - End-to-end claim traceability  
+- Real-time status visibility  
 - Accurate payment reconciliation  
-- Operational reliability  
 - Audit-ready historical tracking  
 
-**Team Size:** 2 Developers  
-**My Role:** Batch processing & data synchronization  
-**Teammate Role:** Real-time processing via Webhooks  
+---
+
+## Project Structure
+
+This project was executed in two major tracks:
+
+### 1️⃣ Insurance Lifecycle Display (Stedi API Integration)
+
+- Integrated Stedi APIs
+- Retrieved insurance lifecycle data
+- Displayed:
+  - Patient information
+  - Insurance provider data
+  - Claim status updates
+  - Payment details
+- Designed and implemented initial data ingestion pipeline
+- Built backend APIs for UI consumption
 
 ---
 
-## Business Problem
+### 2️⃣ Status Synchronization Strategy
 
-Insurance claim processing is inherently asynchronous and fragmented:
+Because Stedi does not guarantee full real-time reflection of all transactions, we implemented a **hybrid architecture**:
 
-- Claims are submitted (837)
-- Status updates arrive later (277)
-- Payments and adjustments arrive separately (835)
-- Transactions use different identifiers
-- Partial payments and reversals are common
+- Webhook-based near real-time updates
+- Daily batch reconciliation (my responsibility)
 
-Without a unified lifecycle system:
-
-- Claim traceability is lost
-- Payment reconciliation becomes manual
-- Operational risk increases
-- Auditing becomes unreliable
+This guarantees **eventual consistency** and prevents missing lifecycle updates.
 
 ---
 
-## Solution Overview
+# My Role
 
-This system:
+## 1️⃣ Initial Data Pipeline & UI Enablement
 
-- Treats **837 as the anchor (source of truth)**
-- Correlates 277 and 835 using **Subscriber Name + Member ID**
-- Normalizes all events into a **single immutable claim status timeline**
-- Supports both **real-time (Webhook)** and **scheduled batch reconciliation**
-- Guarantees eventual consistency even if real-time events fail
+- Established first Stedi API integration
+- Designed bulk ingestion logic
+- Performed large-scale **bulk insert** for bootstrap data
+- Built lifecycle correlation between 837 / 277 / 835
+- Implemented backend APIs powering the UI
+- Delivered initial lifecycle dashboard
 
----
-
-## System Architecture
-
-### Hybrid Processing Model
-
-The system uses a **Webhook + Scheduled Batch Hybrid Architecture**.
-
-- Webhooks handle near real-time updates  
-- Scheduled batch jobs guarantee reconciliation and completeness  
+After initial release:
+- Teammates handled advanced filtering
+- UI design improvements
+- Additional front-end refinements
 
 ---
 
-## Scheduled Execution Architecture  
-### EventBridge → Batch Lambda → .NET Reconciliation Lambda (Daily Execution)
+## 2️⃣ Daily Batch Reconciliation
 
-To ensure historical correctness and reconciliation of missed events, batch processing runs automatically once per day using an AWS-native serverless architecture.
+I designed and implemented:
 
-### Execution Flow
+- Daily scheduled batch execution
+- Watermark-based incremental fetch logic
+- Deduplication policies
+- Idempotent persistence logic
+- Exception logging system
+- Serverless execution pipeline
 
-1. **Amazon EventBridge**
-   - Configured with a daily cron rule
-   - Acts as the centralized scheduler
+This ensured:
 
-2. **Batch Trigger Lambda**
-   - Invoked by EventBridge
-   - Lightweight orchestration layer
-   - Responsible for invoking the reconciliation Lambda
-
-3. **.NET Reconciliation Lambda**
-   - Contains the actual batch handler logic
-   - Fetches updated 837 / 277 / 835 transactions
-   - Reconciles missed webhook events
-   - Performs policy-based deduplication
-   - Ensures idempotent persistence
+- No missing claim updates
+- Automatic recovery from webhook failures
+- Consistent lifecycle state integrity
 
 ---
 
-## Architecture Diagram
+# Scale
 
-```mermaid
-flowchart LR
-    A["837 Claim Submission"] --> B["ClaimInfo Created"]
+| Metric | Value |
+|--------|--------|
+| Daily Batch Traffic | Hundreds ~ Thousands |
+| Organizations | ~1000 |
+| End Users (Patients & Staff) | Hundreds of thousands |
+| Average API Response Time | ~4 seconds |
+| Architecture | Event-driven + Scheduled Batch |
 
-    C["Webhook Listener"] --> D["277 / 835 Events"]
-    D --> E["Status Normalization"]
-
-    EB["Amazon EventBridge<br/>Daily Cron"] --> BL["Batch Trigger Lambda"]
-    BL --> DL[".NET Reconciliation Lambda"]
-    DL --> E
-
-    E --> H["Claim Status Timeline"]
-    H --> I["Reporting / UI"]
-```
+Each transaction was processed independently to prevent cascading failures.
 
 ---
 
-## Core Data Flow
+# Performance Optimization
 
-### 1. 837 – Claim Submission
+## Watermark-Based Incremental Fetch
 
-- Outbound claim submission
-- Creates `ClaimInfo`
-- Initial status: **SUBMITTED**
+Instead of retrieving the full transaction history every time:
 
----
+Fetch only transactions where:
 
-### 2. 277 – Claim Status Update
+ProcessedAt > LastProcessedWatermark
 
-- Arrives via Webhook or Reconciliation Lambda
-- Provides adjudication progress
-- Uses `CategoryCode + StatusCode`
+Benefits:
 
-Deduplicated by:
-
-```
-(ClaimInfoId, CategoryCode, StatusCode)
-```
+- Reduced API calls dramatically
+- Eliminated duplicate processing
+- Improved performance
+- Lower infrastructure cost
 
 ---
 
-### 3. 835 – ERA Payment
+## Controlled Batch Processing
 
-- Arrives via Webhook or Reconciliation Lambda
-- Contains payment & adjustment data
-- Business status derived from payment amounts
-
-Deduplicated by:
-
-```
-(ClaimInfoId, StatusCode)
-```
+- Retrieved transactions in batches of 200
+- Processed per page
+- Immediately persisted to database
+- Prevented excessive memory accumulation
+- Maintained system stability under load
 
 ---
 
-## Matching Strategy
+## Database Optimization
 
-### Deterministic Matching Keys
+Since the system is write-heavy:
 
-```
-Subscriber First Name
-+ Subscriber Last Name
-+ Member ID
-```
-
-Chosen because:
-
-- Consistent across 837 / 277 / 835
-- Independent of payer-specific identifiers
-- Reliable cross-transaction correlation
+- Removed rarely used indexes
+- Optimized insert/update execution paths
+- Reduced index maintenance overhead
+- Used batch-oriented database writes
 
 ---
 
-## Implementation Details
+# Technical Decisions
 
-### Batch Processing (My Contribution)
+## Serverless over EC2
 
-- Implemented daily batch reconciliation using:
-  - **Amazon EventBridge (cron scheduler)**
-  - **Batch Trigger Lambda (orchestration layer)**
-  - **.NET AWS Lambda (reconciliation handler)**
-- Designed policy-based deduplication
-- Implemented idempotent write logic
-- Built reconciliation logic for missed webhook events
-- Enabled safe historical reprocessing
-- Optimized batch-oriented database writes
+Because this is an event-driven batch system, we chose **AWS Lambda** instead of EC2.
 
-### Real-Time Processing (Teammate Contribution)
+Advantages:
 
-- Implemented webhook endpoints
-- Validated incoming payloads
-- Performed immediate persistence
-- Reduced system latency
-- Ensured reliable event-driven updates
+- Simpler infrastructure
+- Cost efficiency
+- Automatic scaling
+- Built-in monitoring
+- No server maintenance overhead
 
 ---
 
-## Data Model (Simplified)
+## Exception Logging Strategy
 
-```mermaid
-classDiagram
-    ClaimInfo <|-- ClaimStatus
+To ensure no missing data:
 
-    class ClaimInfo {
-        Id
-        SubscriberFirstName
-        SubscriberLastName
-        MemberId
-        PatientControlNumber
-        CreatedAt
-    }
-
-    class ClaimStatus {
-        Id
-        ClaimInfoId
-        Source (277/835)
-        CategoryCode
-        StatusCode
-        PaidAmount
-        ChargedAmount
-        TraceNumber
-        CreatedAt
-    }
-```
+- Created dedicated exception log table
+- Logged:
+  - Execution ID
+  - Claim identifier
+  - Error details
+  - Timestamp
+- Enabled safe reprocessing and audit visibility
 
 ---
 
-## UI Overview
+# Architecture Overview
 
-UI responsibilities were split by feature domain:
+## Hybrid Real-Time + Batch Model
 
-- Claim submission & overview screens
-- Status timeline & payment views
-
-<img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
-
-Backend APIs were designed to consistently support both UI segments.
+    Stedi API
+        ↓
+    Initial Bulk Ingestion
+        ↓
+    Database
+        ↑
+Webhook Listener  → Real-Time Update
+        ↑
+EventBridge (Daily)
+        ↓
+Batch Lambda
+        ↓
+Reconciliation Logic
+        ↓
+Database
+        ↓
+Claim Lifecycle UI
 
 ---
 
-## Tech Stack
+# Data Processing Flow
+
+## Real-Time Path
+
+- Webhook receives 277 / 835 events
+- Immediate persistence
+- Lifecycle timeline updated instantly
+
+## Batch Path (Daily)
+
+- Fetch transactions from Stedi
+- Apply watermark filtering
+- Deduplicate records
+- Insert/update database
+- Update watermark
+
+Ensures:
+
+- Eventual consistency
+- Recovery from missed webhook events
+- Complete lifecycle tracking
+
+---
+
+# Impact
+
+- Successfully handled high-volume claim traffic
+- Eliminated missing lifecycle data
+- Reduced operational risk
+- Improved monitoring visibility
+- Maintained consistent ~4 second response time
+- Scaled to support 1000+ organizations
+
+---
+
+# Tech Stack
 
 ### Backend
 - ASP.NET Core
@@ -246,73 +240,25 @@ Backend APIs were designed to consistently support both UI segments.
 - Entity Framework Core
 - AWS Lambda (.NET)
 - Amazon EventBridge
-- Webhook APIs
 
 ### Integration
-- EDI (X12 837 / 277 / 835)
-- Stedi API (JSON artifacts)
+- Stedi API
+- X12 EDI (837 / 277 / 835)
 
 ### Database
-- MySQL Server
-- DynamoDB Server
-- Indexed deduplication keys
-- Immutable history model
+- MySQL
+- DynamoDB
+- Optimized index strategy
+- Exception logging table
 
 ---
 
-## Key Engineering Decisions
+# What This Project Demonstrates
 
-1. **Webhook + Scheduled Batch Hybrid Architecture**
-   - Real-time responsiveness
-   - Guaranteed eventual consistency
-
-2. **EventBridge → Lambda Orchestration Model**
-   - Fully AWS-native scheduling
-   - Decoupled trigger and business logic layers
-   - Serverless and scalable execution model
-
-3. **Immutable Status History**
-   - Full audit trail
-   - Safe reprocessing
-   - Easy investigation
-
-4. **Policy-Based Deduplication**
-   - Centralized and extensible logic
-   - No duplicate status records
-
-5. **Batch-Oriented DB Writes**
-   - Performance optimized
-   - Safe for high-volume ingestion
-
----
-
-## Results
-
-- Reliable claim lifecycle tracking
-- Accurate payment reconciliation
-- Reduced operational overhead
-- Clear audit trail for compliance
-- Automated daily reconciliation pipeline
-- Scalable and resilient ingestion architecture
-
----
-
-## What This Project Demonstrates
-
-- Real-world healthcare domain expertise
-- Distributed system design
-- Hybrid event-driven + batch architecture
-- Idempotent data engineering practices
-- AWS serverless orchestration design
-- Strong backend ownership and reliability mindset
-
----
-
-## Author Contribution Summary
-
-- Designed overall batch reconciliation strategy
-- Architected EventBridge → Lambda orchestration pipeline
-- Implemented .NET reconciliation Lambda handler
-- Built centralized deduplication policy logic
-- Developed reconciliation and backfill mechanisms
-- Co-developed backend APIs for UI consumption
+- Large-scale healthcare data ingestion design
+- Hybrid real-time + batch architecture
+- Watermark-based incremental processing
+- Write-optimized database engineering
+- Production-grade reliability design
+- Serverless orchestration strategy
+- Healthcare EDI domain expertise
