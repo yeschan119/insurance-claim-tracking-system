@@ -1,82 +1,101 @@
 # Insurance Claim Lifecycle Tracking System
 
 [한국어 🇰🇷](README.Ko.md)
-## Project Overview
-
-This project is an **insurance claim lifecycle tracking and reconciliation system** designed to
-reliably manage medical claim submissions, adjudication status updates, and payment processing.
-
-The system integrates **837 (Claim Submission), 277 (Claim Status), and 835 (ERA Payment)** transactions
-into a **single, traceable claim timeline**.
-
-**Team Size:** 2 Developers
-**My Role:** Batch processing & data synchronization (WebJob)
-**Teammate Role:** Real-time processing via Webhooks
 
 ---
 
-## Team Collaboration & Role Distribution (Very Important)
+## Project Overview
 
-### Developer A (Teammate)
-- Implemented **Webhook-based real-time ingestion**
-- Processed:
-  - Incoming 277 Claim Status notifications
-  - Incoming 835 ERA payment events
-- Ensured:
-  - Near real-time visibility of payer responses
-  - Immediate persistence of event-driven updates
+This project is an **insurance claim lifecycle tracking and reconciliation system** designed to reliably manage medical claim submissions, adjudication status updates, and payment processing.
 
-### Developer B (Me)
-- Designed and implemented **WebJob-based batch synchronization**
-- Responsibilities:
-  - Periodically fetch updated transactions from the EDI provider
-  - Reconcile missed or delayed webhook events
-  - Ensure data consistency and completeness
-- Focused on:
-  - Idempotent processing
-  - Deduplication logic
-  - Historical correctness
+The system integrates:
 
-### UI Development
-- UI responsibilities were **split by feature domain**
-  - Claim submission & overview screens
-  - Status timeline & payment views
-  - UI example(one of the whole system)
-  - <img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
+- **837 (Claim Submission)**
+- **277 (Claim Status)**
+- **835 (ERA Payment)**
 
-- Backend APIs were designed to support both UI segments consistently
+into a **single, traceable and immutable claim timeline**.
+
+The goal of the system is to guarantee:
+
+- End-to-end claim traceability
+- Accurate payment reconciliation
+- Operational reliability
+- Audit-ready historical tracking
+
+**Team Size:** 2 Developers  
+**My Role:** Batch processing & data synchronization (WebJob)  
+**Teammate Role:** Real-time processing via Webhooks  
 
 ---
 
 ## Business Problem
 
-Insurance claim processing is asynchronous and fragmented:
+Insurance claim processing is inherently asynchronous and fragmented:
 
 - Claims are submitted (837)
 - Status updates arrive later (277)
 - Payments and adjustments arrive separately (835)
-- Each transaction uses different identifiers
-- Partial payments, reversals, and reprocessing are common
+- Transactions use different identifiers
+- Partial payments and reversals are common
 
-Without a unified system:
+Without a unified lifecycle system:
+
 - Claim traceability is lost
 - Payment reconciliation becomes manual
-- Auditing is unreliable
+- Operational risk increases
+- Auditing becomes unreliable
 
 ---
 
-## Solution Summary
+## Solution Overview
 
 This system:
+
 - Treats **837 as the anchor (source of truth)**
 - Correlates 277 and 835 using **Subscriber Name + Member ID**
-- Normalizes all events into a **single immutable status timeline**
-- Supports both **real-time (Webhook)** and **batch (WebJob)** processing
-- Preserves full history for audit and analysis
+- Normalizes all events into a **single immutable claim status timeline**
+- Supports both **real-time (Webhook)** and **scheduled batch reconciliation**
+- Guarantees eventual consistency even if real-time events fail
 
 ---
 
-## High-Level Architecture
+## System Architecture
+
+### Hybrid Processing Model
+
+The system uses a **Webhook + Scheduled Batch Hybrid Architecture**.
+
+- Webhooks handle near real-time updates
+- Scheduled batch jobs guarantee reconciliation and completeness
+
+---
+
+## Scheduled Execution Architecture  
+### EventBridge → Lambda → WebJob (Daily Execution)
+
+To ensure historical correctness and reconciliation of missed events, batch processing runs automatically once per day using AWS scheduling infrastructure.
+
+### Execution Flow
+
+1. **Amazon EventBridge**
+   - Configured with a daily cron rule
+   - Acts as the centralized scheduler
+
+2. **AWS Lambda**
+   - Invoked by EventBridge
+   - Securely triggers the Azure WebJob execution
+   - Handles execution context and validation
+
+3. **Azure WebJob**
+   - Fetches updated EDI transactions
+   - Reconciles missed webhook events
+   - Performs deduplication
+   - Ensures idempotent persistence
+
+---
+
+### Architecture Diagram
 
 ```mermaid
 flowchart LR
@@ -85,8 +104,9 @@ flowchart LR
     C[Webhook Listener] --> D[277 / 835 Events]
     D --> E[Status Normalization]
 
-    F[WebJob Scheduler] --> G[Periodic Reconciliation]
-    G --> E
+    EB[Amazon EventBridge\nDaily Cron] --> L[AWS Lambda\nTrigger Layer]
+    L --> W[Azure WebJob\nBatch Reconciliation]
+    W --> E
 
     E --> H[Claim Status Timeline]
     H --> I[Reporting / UI]
@@ -97,21 +117,36 @@ flowchart LR
 ## Core Data Flow
 
 ### 1. 837 – Claim Submission
+
 - Outbound claim submission
 - Creates `ClaimInfo`
 - Initial status: **SUBMITTED**
 
+---
+
 ### 2. 277 – Claim Status Update
+
 - Arrives via Webhook or WebJob
 - Provides adjudication progress
 - Uses `CategoryCode + StatusCode`
-- Deduplicated by `(ClaimInfoId, CategoryCode, StatusCode)`
+- Deduplicated by:
+
+```
+(ClaimInfoId, CategoryCode, StatusCode)
+```
+
+---
 
 ### 3. 835 – ERA Payment
+
 - Arrives via Webhook or WebJob
 - Contains payment & adjustment data
 - Business status derived from payment amounts
-- Deduplicated by `(ClaimInfoId, StatusCode)`
+- Deduplicated by:
+
+```
+(ClaimInfoId, StatusCode)
+```
 
 ---
 
@@ -119,16 +154,17 @@ flowchart LR
 
 ### Deterministic Matching Keys
 
-```text
+```
 Subscriber First Name
 + Subscriber Last Name
 + Member ID
 ```
 
 Chosen because:
+
 - Consistent across 837 / 277 / 835
-- Independent of payer-specific IDs
-- Reliable for cross-transaction correlation
+- Independent of payer-specific identifiers
+- Reliable cross-transaction correlation
 
 ---
 
@@ -136,22 +172,22 @@ Chosen because:
 
 ### Batch Processing (My Contribution)
 
-- Implemented scheduled WebJobs to:
-  - Fetch updated EDI transactions
-  - Backfill missing webhook events
-  - Reprocess historical data safely
-- Designed **deduplication policy functions**
-- Ensured:
-  - Idempotent writes
-  - No duplicate status records
-  - Full historical accuracy
+- Implemented scheduled WebJob triggered daily via:
+  - Amazon EventBridge
+  - AWS Lambda invocation layer
+- Designed policy-based deduplication
+- Implemented idempotent write logic
+- Built reconciliation logic for missed webhook events
+- Enabled safe historical reprocessing
+- Optimized batch-oriented database writes
 
 ### Real-Time Processing (Teammate Contribution)
 
 - Implemented webhook endpoints
 - Validated incoming payloads
-- Triggered immediate status updates
+- Performed immediate persistence
 - Reduced system latency
+- Ensured reliable event-driven updates
 
 ---
 
@@ -185,6 +221,19 @@ classDiagram
 
 ---
 
+## UI Overview
+
+UI responsibilities were split by feature domain:
+
+- Claim submission & overview screens
+- Status timeline & payment views
+
+<img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
+
+Backend APIs were designed to consistently support both UI segments.
+
+---
+
 ## Tech Stack
 
 ### Backend
@@ -195,6 +244,7 @@ classDiagram
 - Azure WebJobs
 - Webhook APIs
 - AWS Lambda
+- Amazon EventBridge
 
 ### Integration
 - EDI (X12 837 / 277 / 835)
@@ -210,21 +260,27 @@ classDiagram
 
 ## Key Engineering Decisions
 
-1. **Webhook + WebJob Hybrid Architecture**
+1. **Webhook + Scheduled Batch Hybrid Architecture**
    - Real-time responsiveness
    - Guaranteed eventual consistency
 
-2. **Immutable Status History**
+2. **EventBridge → Lambda → WebJob Trigger Model**
+   - Fully automated daily reconciliation
+   - Cloud-native scheduling
+   - Decoupled execution layers
+
+3. **Immutable Status History**
    - Full audit trail
-   - Easy rollback and investigation
+   - Safe reprocessing
+   - Easy investigation
 
-3. **Policy-Based Deduplication**
-   - Centralized logic
-   - Easy extensibility
+4. **Policy-Based Deduplication**
+   - Centralized and extensible logic
+   - No duplicate status records
 
-4. **Batch-Oriented DB Writes**
+5. **Batch-Oriented DB Writes**
    - Performance optimized
-   - Safe for large volumes
+   - Safe for high-volume ingestion
 
 ---
 
@@ -234,7 +290,8 @@ classDiagram
 - Accurate payment reconciliation
 - Reduced operational overhead
 - Clear audit trail for compliance
-- Scalable ingestion model
+- Automated daily reconciliation pipeline
+- Scalable and resilient ingestion architecture
 
 ---
 
@@ -242,15 +299,18 @@ classDiagram
 
 - Real-world healthcare domain expertise
 - Distributed system design
-- Event-driven + batch hybrid processing
-- Strong ownership of backend reliability
-- Collaboration in a multi-developer environment
+- Hybrid event-driven + batch architecture
+- Idempotent data engineering practices
+- Cross-cloud orchestration (AWS + Azure)
+- Strong backend ownership and reliability mindset
 
 ---
 
 ## Author Contribution Summary
 
 - Designed batch reconciliation strategy
-- Implemented WebJob ingestion pipeline
-- Built deduplication and idempotency logic
+- Architected EventBridge → Lambda → WebJob execution pipeline
+- Implemented idempotent ingestion architecture
+- Built centralized deduplication policy logic
+- Developed reconciliation and backfill mechanisms
 - Co-developed backend APIs for UI consumption
