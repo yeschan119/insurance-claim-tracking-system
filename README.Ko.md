@@ -39,6 +39,7 @@
 - 초기 대량 데이터 파이프라인 설계
 - UI를 위한 백엔드 API 구현
 - UI example
+
   <img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
 ---
 
