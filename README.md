@@ -38,9 +38,6 @@ This project was executed in two major tracks:
   - Payment details
 - Designed and implemented initial data ingestion pipeline
 - Built backend APIs for UI consumption
-- UI Example
-
-<img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
 
 ---
 
@@ -65,6 +62,9 @@ This guarantees **eventual consistency** and prevents missing lifecycle updates.
 - Built lifecycle correlation between 837 / 277 / 835
 - Implemented backend APIs powering the UI
 - Delivered initial lifecycle dashboard
+- UI Example
+
+<img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
 
 After initial release:
 - Teammates handled advanced filtering
