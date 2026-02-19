@@ -3,7 +3,7 @@
 
 ---
 
-## 📌 Project Overview | 프로젝트 개요
+## Project Overview | 프로젝트 개요
 
 This project is an **insurance claim lifecycle tracking and reconciliation system** designed to reliably manage medical claim submissions, adjudication status updates, and payment processing.
 
@@ -25,9 +25,9 @@ into a **single, traceable claim timeline**.
 
 ---
 
-## 🤝 Team Collaboration | 팀 협업 및 역할 분담
+## 팀 협업 및 역할 분담
 
-### 👨‍💻 Developer A (Teammate)
+### Developer A (Teammate)
 
 - Implemented **Webhook-based real-time ingestion**
 - Processed:
@@ -48,9 +48,9 @@ Webhook 기반 실시간 수집 시스템 구현
 - Reconciled missed or delayed webhook events
 - Ensured data consistency and completeness
 
-WebJob 기반 배치 동기화 시스템 설계 및 구현  
-누락/지연 Webhook 이벤트 보정  
-데이터 정합성 및 완전성 보장  
+WebJob 기반 배치 동기화 시스템 설계 및 구현
+누락/지연 Webhook 이벤트 보정
+데이터 정합성 및 완전성 보장
 
 Focused on:
 
@@ -60,7 +60,7 @@ Focused on:
 
 ---
 
-## 🖥 UI Overview | UI 구성
+## UI Overview | UI 구성
 
 - Claim submission & overview screens  
 - Status timeline & payment views  
@@ -77,7 +77,7 @@ Backend APIs were designed to support both UI domains consistently.
 
 ---
 
-## 🚨 Business Problem | 비즈니스 문제
+## 비즈니스 문제
 
 Insurance claim processing is asynchronous and fragmented:
 
@@ -101,7 +101,7 @@ Without a unified system:
 
 ---
 
-## ✅ Solution Summary | 솔루션 요약
+## 솔루션 요약
 
 The system:
 
@@ -121,7 +121,7 @@ The system:
 
 ---
 
-## 🏗 High-Level Architecture | 상위 아키텍처
+## High-Level Architecture | 상위 아키텍처
 
 ```mermaid
 flowchart LR
@@ -136,7 +136,7 @@ flowchart LR
 
 ---
 
-## 🔄 Core Data Flow | 핵심 데이터 흐름
+## 🔄 Core Data Flow
 
 ### 1️⃣ 837 – Claim Submission / 청구 제출
 
@@ -167,7 +167,7 @@ Deduplicated by:
 
 ---
 
-## 🔑 Matching Strategy | 매칭 전략
+## Matching Strategy
 
 Deterministic Keys:
 
@@ -185,7 +185,7 @@ Subscriber First Name
 
 ## ⚙ Implementation Details | 구현 상세
 
-### 📦 Batch Processing (My Contribution)
+### Batch Processing (My Contribution)
 
 - Scheduled WebJobs  
 - Backfill logic for missed webhook events  
@@ -193,7 +193,7 @@ Subscriber First Name
 - Policy-based deduplication  
 - Historical reprocessing safety  
 
-### ⚡ Real-Time Processing (Teammate)
+### Real-Time Processing (Teammate)
 
 - Webhook endpoints  
 - Payload validation  
@@ -202,7 +202,7 @@ Subscriber First Name
 
 ---
 
-## 🗃 Data Model (Simplified) | 데이터 모델
+## Data Model (Simplified) 
 
 ```mermaid
 classDiagram
@@ -232,29 +232,29 @@ classDiagram
 
 ---
 
-## 🛠 Tech Stack | 기술 스택
+## Tech Stack
 
 ### Backend
-- ASP.NET Core  
-- C#  
-- Entity Framework Core  
-- Azure WebJobs  
-- Webhook APIs  
-- AWS Lambda  
+- ASP.NET Core
+- C#
+- Entity Framework Core
+- Azure WebJobs
+- Webhook APIs
+- AWS Lambda
 
 ### Integration
-- EDI (X12 837 / 277 / 835)  
-- Stedi API  
+- EDI (X12 837 / 277 / 835)
+- Stedi API
 
 ### Database
-- MySQL  
+- MySQL
 - DynamoDB  
 - Indexed deduplication keys  
 - Immutable history model  
 
 ---
 
-## 🧠 Key Engineering Decisions | 주요 의사결정
+## Key Engineering Decisions
 
 1. **Webhook + WebJob Hybrid Architecture**  
    - Real-time responsiveness  
@@ -274,7 +274,7 @@ classDiagram
 
 ---
 
-## 📈 Results | 성과
+## Results
 
 - Reliable claim lifecycle tracking  
 - Accurate payment reconciliation  
@@ -284,7 +284,7 @@ classDiagram
 
 ---
 
-## 🎯 What This Project Demonstrates | 프로젝트 역량
+## 프로젝트 역량
 
 - Healthcare domain expertise  
 - Distributed system design  
@@ -294,7 +294,7 @@ classDiagram
 
 ---
 
-## 👤 Author Contribution | 기여 요약
+## Author Contribution
 
 - Designed batch reconciliation strategy  
 - Implemented WebJob ingestion pipeline  
