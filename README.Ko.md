@@ -68,7 +68,7 @@ Focused on:
 - 청구 제출 및 개요 화면  
 - 상태 타임라인 및 지급 내역 화면  
 
-### UI Example | UI 예시
+### UI Example
 
 <img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
 
