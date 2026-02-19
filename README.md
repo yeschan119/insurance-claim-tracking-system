@@ -99,17 +99,17 @@ To ensure historical correctness and reconciliation of missed events, batch proc
 
 ```mermaid
 flowchart LR
-    A[837 Claim Submission] --> B[ClaimInfo Created]
+    A["837 Claim Submission"] --> B["ClaimInfo Created"]
 
-    C[Webhook Listener] --> D[277 / 835 Events]
-    D --> E[Status Normalization]
+    C["Webhook Listener"] --> D["277 / 835 Events"]
+    D --> E["Status Normalization"]
 
-    EB[Amazon EventBridge\nDaily Cron] --> L[AWS Lambda\nTrigger Layer]
-    L --> W[Azure WebJob\nBatch Reconciliation]
+    EB["Amazon EventBridge<br/>Daily Cron"] --> L["AWS Lambda<br/>Trigger Layer"]
+    L --> W["Azure WebJob<br/>Batch Reconciliation"]
     W --> E
 
-    E --> H[Claim Status Timeline]
-    H --> I[Reporting / UI]
+    E --> H["Claim Status Timeline"]
+    H --> I["Reporting / UI"]
 ```
 
 ---
