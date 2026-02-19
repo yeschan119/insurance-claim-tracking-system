@@ -7,7 +7,7 @@
 ## Project Overview
 This project is a large-scale **Insurance Claim Lifecycle Tracking & Monitoring System** built on top of the Stedi EDI platform.
 
-## 📌 What is Stedi?
+### 📌 What is Stedi?
 **Stedi** is a cloud-based platform that enables organizations to process healthcare and insurance **EDI (Electronic Data Interchange)** transactions through modern APIs.
 
 The system integrates:
@@ -51,6 +51,27 @@ Because Stedi does not guarantee full real-time reflection of all transactions, 
 - Daily batch reconciliation (my responsibility)
 
 This guarantees **eventual consistency** and prevents missing lifecycle updates.
+
+---
+
+# Tech Stack
+
+### Backend
+- ASP.NET Core
+- C#
+- Entity Framework Core
+- AWS Lambda (.NET)
+- Amazon EventBridge
+
+### Integration
+- Stedi API
+- X12 EDI (837 / 277 / 835)
+
+### Database
+- MySQL
+- DynamoDB
+- Optimized index strategy
+- Exception logging table
 
 ---
 
@@ -234,27 +255,6 @@ Ensures:
 - Improved monitoring visibility
 - Maintained consistent ~4 second response time
 - Scaled to support 1000+ organizations
-
----
-
-# Tech Stack
-
-### Backend
-- ASP.NET Core
-- C#
-- Entity Framework Core
-- AWS Lambda (.NET)
-- Amazon EventBridge
-
-### Integration
-- Stedi API
-- X12 EDI (837 / 277 / 835)
-
-### Database
-- MySQL
-- DynamoDB
-- Optimized index strategy
-- Exception logging table
 
 ---
 
