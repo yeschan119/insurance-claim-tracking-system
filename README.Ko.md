@@ -1,7 +1,7 @@
 # Insurance Claim Lifecycle Tracking System (보험 청구 라이프사이클 추적 시스템)
 
 ---
-[한국어 🇰🇷](README.md)
+[English](README.md)
 
 ## 프로젝트 개요
 
