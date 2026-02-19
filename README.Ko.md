@@ -23,6 +23,7 @@
 - 정확한 지급 정산 관리  
 - 감사(Audit) 대응 가능한 이력 관리  
 
+<img width="600" height="400" alt="project3" src="https://github.com/user-attachments/assets/579211a4-6e2f-4e39-acf7-12f46075ca86" />
 ---
 
 ## 프로젝트 구성
