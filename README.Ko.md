@@ -2,20 +2,20 @@
 
 ---
 
-## 📌 프로젝트 개요
+## 프로젝트 개요
 
-이 프로젝트는 Stedi EDI 플랫폼을 기반으로 구축한 **보험 청구 라이프사이클 추적 및 모니터링 시스템**입니다.
+이 프로젝트는 Stedi EDI 플랫폼을 기반으로 구축한 **보험 청구 라이프사이클 추적 및 모니터링 시스템**.
 
-## 📌 Stedi란?
-**Stedi**는 의료 및 보험 산업에서 사용되는 **EDI (Electronic Data Interchange)** 트랜잭션을 API 기반으로 쉽게 처리할 수 있도록 제공하는 클라우드 플랫폼입니다.
+## Stedi란?
+**Stedi**는 의료 및 보험 산업에서 사용되는 **EDI (Electronic Data Interchange)** 트랜잭션을 API 기반으로 쉽게 처리할 수 있도록 제공하는 클라우드 플랫폼.
 
-본 시스템은 다음 EDI 트랜잭션을 통합합니다:
+본 시스템은 다음 EDI 트랜잭션을 통합:
 
 - **837 (보험 청구 제출)**
 - **277 (청구 상태 업데이트)**
 - **835 (ERA 지급 정보)**
 
-이를 하나의 통합된 라이프사이클 타임라인으로 구성하여 다음을 보장합니다:
+이를 하나의 통합된 라이프사이클 타임라인으로 구성하여 다음을 보장:
 
 - End-to-End 청구 추적성 확보  
 - 실시간 상태 가시성 제공  
@@ -24,9 +24,9 @@
 
 ---
 
-## 🏗 프로젝트 구성
+## 프로젝트 구성
 
-본 프로젝트는 크게 두 가지 축으로 진행되었습니다.
+본 프로젝트는 크게 두 가지 축으로 진행.
 
 ---
 
@@ -45,13 +45,34 @@
 
 ### 2️⃣ 상태 동기화 전략 설계
 
-Stedi 특성상 모든 데이터가 완전한 실시간으로 반영되지 않기 때문에, 다음과 같은 **Hybrid 구조**를 설계했습니다:
+Stedi 특성상 모든 데이터가 완전한 실시간으로 반영되지 않기 때문에, 다음과 같은 **Hybrid 구조**를 설계:
 
 - Webhook 기반 실시간 반영
 - 하루 1회 Batch 재동기화 (제가 담당)
 
-이를 통해 **Eventual Consistency**를 보장하고 누락 데이터를 방지했습니다.
+이를 통해 **Eventual Consistency**를 보장하고 누락 데이터를 방지.
 
+## Tech Stack
+
+### Backend
+- Angular
+- ASP.NET Core
+- C#, Typescript, HTML, CSS
+- Entity Framework Core
+- AWS Lambda (.NET)
+- Amazon EventBridge
+
+### Integration
+- Stedi API
+- X12 EDI (837 / 277 / 835)
+
+### Database
+- MySQL
+- DynamoDB
+- Optimized index strategy
+- Exception logging table
+
+---
 ---
 
 # 👨‍💻 나의 역할
@@ -77,7 +98,7 @@ Stedi 특성상 모든 데이터가 완전한 실시간으로 반영되지 않�
 
 ## 2️⃣ 일일 Batch 재동기화 로직 구현
 
-다음 항목을 설계 및 구현했습니다:
+다음 항목을 설계 및 구현:
 
 - 하루 1회 Batch 실행 구조
 - Watermark 기반 증분 데이터 수집
@@ -94,7 +115,7 @@ Stedi 특성상 모든 데이터가 완전한 실시간으로 반영되지 않�
 
 ---
 
-# 📊 규모 (Scale)
+# 규모 (Scale)
 
 | 항목 | 규모 |
 |------|------|
@@ -104,11 +125,11 @@ Stedi 특성상 모든 데이터가 완전한 실시간으로 반영되지 않�
 | 평균 API 응답 시간 | 약 4초 |
 | 처리 구조 | Event-driven + Scheduled Batch |
 
-각 요청은 독립적으로 처리되어 장애 확산을 방지하도록 설계했습니다.
+각 요청은 독립적으로 처리되어 장애 확산을 방지하도록 설계.
 
 ---
 
-# 🚀 성능 최적화 전략
+# 성능 최적화 전략
 
 ## 1️⃣ Watermark 기반 증분 수집
 
@@ -180,7 +201,7 @@ Event-driven Batch 구조이므로 EC2 대신 AWS Lambda를 선택
 
 ---
 
-# 🏗 아키텍처 개요
+# 아키텍처 개요
 
 ## Hybrid 실시간 + Batch 구조
 
@@ -230,7 +251,7 @@ Claim Lifecycle UI
 
 ---
 
-# 🎯 프로젝트 성과 (Impact)
+# 프로젝트 성과 (Impact)
 
 - 대규모 트래픽 안정적 처리
 - 누락 데이터 제거
@@ -241,28 +262,7 @@ Claim Lifecycle UI
 
 ---
 
-# 🛠 기술 스택
-
-### Backend
-- ASP.NET Core
-- C#
-- Entity Framework Core
-- AWS Lambda (.NET)
-- Amazon EventBridge
-
-### Integration
-- Stedi API
-- X12 EDI (837 / 277 / 835)
-
-### Database
-- MySQL
-- DynamoDB
-- 최적화된 Index 전략
-- Exception Log Table
-
----
-
-# 📌 이 프로젝트가 보여주는 것
+# 이 프로젝트가 보여주는 것
 
 - 대규모 의료 데이터 파이프라인 설계 능력
 - Hybrid Event-driven + Batch 아키텍처 설계
