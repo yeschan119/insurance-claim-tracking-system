@@ -57,8 +57,9 @@ This guarantees **eventual consistency** and prevents missing lifecycle updates.
 # Tech Stack
 
 ### Backend
+- Angular
 - ASP.NET Core
-- C#
+- C#, Typescript, HTML, CSS
 - Entity Framework Core
 - AWS Lambda (.NET)
 - Amazon EventBridge
