@@ -41,9 +41,6 @@
   - 지급 내역
 - 초기 대량 데이터 파이프라인 설계
 - UI를 위한 백엔드 API 구현
-- UI example
-
-  <img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
 ---
 
 ### 2️⃣ 상태 동기화 전략 설계
@@ -67,6 +64,9 @@ Stedi 특성상 모든 데이터가 완전한 실시간으로 반영되지 않�
 - 라이프사이클 통합 데이터 모델 설계
 - UI를 위한 Backend API 개발
 - 초기 대시보드 기능 구현
+- UI example
+  
+  <img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
 
 이후:
 - 동료가 Filtering 기능 구현
