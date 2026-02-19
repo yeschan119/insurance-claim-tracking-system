@@ -19,7 +19,7 @@ into a unified lifecycle timeline that enables:
 - End-to-end claim traceability  
 - Real-time status visibility  
 - Accurate payment reconciliation  
-- Audit-ready historical tracking  
+- Audit-ready historical tracking
 
 ---
 
@@ -27,7 +27,7 @@ into a unified lifecycle timeline that enables:
 
 This project was executed in two major tracks:
 
-### 1️⃣ Insurance Lifecycle Display (Stedi API Integration)
+### 1️⃣ Insurance Lifecycle Display (Stedi API Integration) - my responsibility
 
 - Integrated Stedi APIs
 - Retrieved insurance lifecycle data
@@ -38,6 +38,9 @@ This project was executed in two major tracks:
   - Payment details
 - Designed and implemented initial data ingestion pipeline
 - Built backend APIs for UI consumption
+- UI Example
+
+<img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
 
 ---
 
@@ -183,17 +186,17 @@ To ensure no missing data:
         ↓
     Database
         ↑
-Webhook Listener  → Real-Time Update
-        ↑
-EventBridge (Daily)
-        ↓
-Batch Lambda
-        ↓
-Reconciliation Logic
-        ↓
-Database
-        ↓
-Claim Lifecycle UI
+    Webhook Listener  → Real-Time Update
+            ↑
+    EventBridge (Daily)
+            ↓
+    Batch Lambda
+            ↓
+    Reconciliation Logic
+            ↓
+    Database
+            ↓
+    Claim Lifecycle UI
 
 ---
 
