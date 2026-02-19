@@ -1,302 +1,269 @@
-# Insurance Claim Lifecycle Tracking System  
-# 보험 청구 라이프사이클 추적 시스템
+# Insurance Claim Lifecycle Tracking System (보험 청구 라이프사이클 추적 시스템)
 
 ---
 
-## Project Overview | 프로젝트 개요
+## 📌 프로젝트 개요
 
-This project is an **insurance claim lifecycle tracking and reconciliation system** designed to reliably manage medical claim submissions, adjudication status updates, and payment processing.
+이 프로젝트는 Stedi EDI 플랫폼을 기반으로 구축한 **보험 청구 라이프사이클 추적 및 모니터링 시스템**입니다.
 
-본 프로젝트는 **의료 보험 청구의 전체 라이프사이클을 추적하고 정산을 관리하는 시스템**입니다.
+본 시스템은 다음 EDI 트랜잭션을 통합합니다:
 
-The system integrates:
+- **837 (보험 청구 제출)**
+- **277 (청구 상태 업데이트)**
+- **835 (ERA 지급 정보)**
 
-- **837 (Claim Submission / 청구 제출)**
-- **277 (Claim Status / 청구 상태 조회)**
-- **835 (ERA Payment / 전자 지급 명세)**
+이를 하나의 통합된 라이프사이클 타임라인으로 구성하여 다음을 보장합니다:
 
-into a **single, traceable claim timeline**.
-
-이를 하나의 **추적 가능한 청구 타임라인**으로 통합합니다.
-
-**Team Size:** 2 Developers  
-**My Role:** Batch processing & data synchronization (WebJob)  
-**Teammate Role:** Real-time processing via Webhooks  
+- End-to-End 청구 추적성 확보  
+- 실시간 상태 가시성 제공  
+- 정확한 지급 정산 관리  
+- 감사(Audit) 대응 가능한 이력 관리  
 
 ---
 
-## 팀 협업 및 역할 분담
+## 🏗 프로젝트 구성
 
-### Developer A (Teammate)
-
-- Implemented **Webhook-based real-time ingestion**
-- Processed:
-  - Incoming 277 Claim Status notifications
-  - Incoming 835 ERA payment events
-- Ensured near real-time visibility of payer responses
-
-Webhook 기반 실시간 수집 시스템 구현  
-277 상태 알림 및 835 지급 이벤트 처리  
-지급자 응답에 대한 거의 실시간 가시성 확보  
+본 프로젝트는 크게 두 가지 축으로 진행되었습니다.
 
 ---
 
-### 👨‍💻 Developer B (Me)
+### 1️⃣ Stedi API 기반 보험 라이프사이클 UI 구성
 
-- Designed and implemented **WebJob-based batch synchronization**
-- Periodically fetched updated EDI transactions
-- Reconciled missed or delayed webhook events
-- Ensured data consistency and completeness
+- Stedi API 연동
+- 보험 청구 데이터 수집
+- 다음 정보 UI에 표시:
+  - 환자 정보
+  - 보험사 정보
+  - 청구 상태
+  - 지급 내역
+- 초기 대량 데이터 파이프라인 설계
+- UI를 위한 백엔드 API 구현
+- UI example
+  <img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
+---
 
-WebJob 기반 배치 동기화 시스템 설계 및 구현
-누락/지연 Webhook 이벤트 보정
-데이터 정합성 및 완전성 보장
+### 2️⃣ 상태 동기화 전략 설계
 
-Focused on:
+Stedi 특성상 모든 데이터가 완전한 실시간으로 반영되지 않기 때문에, 다음과 같은 **Hybrid 구조**를 설계했습니다:
 
-- Idempotent processing  
-- Deduplication logic  
-- Historical correctness  
+- Webhook 기반 실시간 반영
+- 하루 1회 Batch 재동기화 (제가 담당)
+
+이를 통해 **Eventual Consistency**를 보장하고 누락 데이터를 방지했습니다.
 
 ---
 
-## UI Overview | UI 구성
+# 👨‍💻 나의 역할
 
-- Claim submission & overview screens  
-- Status timeline & payment views  
+## 1️⃣ 초기 데이터 파이프라인 설계 및 UI 기반 구축
 
-- 청구 제출 및 개요 화면  
-- 상태 타임라인 및 지급 내역 화면  
+- Stedi API 최초 연동
+- 초기 대량 데이터 Bulk Insert 처리
+- 837 / 277 / 835 간 상관관계 매핑 설계
+- 라이프사이클 통합 데이터 모델 설계
+- UI를 위한 Backend API 개발
+- 초기 대시보드 기능 구현
 
-### UI Example
-
-<img width="800" height="500" alt="EML" src="https://github.com/user-attachments/assets/7af9580a-4a39-4847-931f-14f17f28370f" />
-
-Backend APIs were designed to support both UI domains consistently.  
-백엔드 API는 두 UI 영역을 일관되게 지원하도록 설계되었습니다.
-
----
-
-## 비즈니스 문제
-
-Insurance claim processing is asynchronous and fragmented:
-
-- Claims are submitted (837)  
-- Status updates arrive later (277)  
-- Payments arrive separately (835)  
-- Partial payments and reversals are common  
-
-보험 청구 처리는 비동기적이며 분절되어 있습니다.
-
-- 837 청구 제출  
-- 이후 277 상태 업데이트 도착  
-- 835 지급 및 조정 정보 별도 도착  
-- 부분 지급 및 반전(Reversal) 빈번  
-
-Without a unified system:
-
-- Claim traceability is lost  
-- Payment reconciliation becomes manual  
-- Auditing becomes unreliable  
+이후:
+- 동료가 Filtering 기능 구현
+- UI 디자인 개선
+- 기타 Front-End 작업 진행
 
 ---
 
-## 솔루션 요약
+## 2️⃣ 일일 Batch 재동기화 로직 구현
 
-The system:
+다음 항목을 설계 및 구현했습니다:
 
-- Treats **837 as the source of truth**  
-- Correlates 277 and 835 using **Subscriber Name + Member ID**  
-- Normalizes all events into a **single immutable status timeline**  
-- Supports both **real-time (Webhook)** and **batch (WebJob)** processing  
-- Preserves full history for audit and analysis  
+- 하루 1회 Batch 실행 구조
+- Watermark 기반 증분 데이터 수집
+- Deduplication 정책 설계
+- Idempotent 저장 로직 구현
+- Exception Log Table 구축
+- AWS Serverless 아키텍처 설계
 
-본 시스템은:
+이를 통해:
 
-- **837을 기준 데이터로 설정**  
-- **Subscriber Name + Member ID** 기준 매칭  
-- 모든 이벤트를 **Immutable 상태 타임라인**으로 정규화  
-- 실시간 + 배치 하이브리드 처리  
-- 감사 및 분석을 위한 전체 이력 보존  
+- 누락 데이터 제거
+- Webhook 실패 대비 복구 가능
+- 상태 데이터 정합성 유지
 
 ---
 
-## High-Level Architecture | 상위 아키텍처
+# 📊 규모 (Scale)
 
-```mermaid
-flowchart LR
-    A[837 Claim Submission] --> B[ClaimInfo Created]
-    C[Webhook Listener] --> D[277 / 835 Events]
-    D --> E[Status Normalization]
-    F[WebJob Scheduler] --> G[Periodic Reconciliation]
-    G --> E
-    E --> H[Claim Status Timeline]
-    H --> I[Reporting / UI]
+| 항목 | 규모 |
+|------|------|
+| 평균 일일 배치 트래픽 | 수백 ~ 수천 건 |
+| 조직 수 | 약 1000개 |
+| 사용자 수 (학생/직원) | 수십만 명 |
+| 평균 API 응답 시간 | 약 4초 |
+| 처리 구조 | Event-driven + Scheduled Batch |
+
+각 요청은 독립적으로 처리되어 장애 확산을 방지하도록 설계했습니다.
+
+---
+
+# 🚀 성능 최적화 전략
+
+## 1️⃣ Watermark 기반 증분 수집
+
+매번 전체 데이터를 가져오지 않고:
+
+```
+ProcessedAt > LastProcessedWatermark
+```
+
+조건으로 최신 데이터만 수집
+
+효과:
+
+- API 호출 횟수 감소
+- 중복 처리 제거
+- 처리 속도 향상
+- 비용 절감
+
+---
+
+## 2️⃣ 200건 단위 Batch 처리
+
+- 한 번에 200개씩 조회
+- 페이지 단위 처리
+- 즉시 DB 반영
+- 메모리 누적 방지
+- 시스템 안정성 확보
+
+---
+
+## 3️⃣ DB 최적화
+
+Write-heavy 구조이므로:
+
+- 사용 빈도 낮은 Index 제거
+- Insert / Update 경로 최적화
+- Batch Insert 활용
+- Index 유지 비용 감소
+
+---
+
+# ⚙ 기술적 의사결정
+
+## Serverless (Lambda) 선택
+
+Event-driven Batch 구조이므로 EC2 대신 AWS Lambda를 선택
+
+장점:
+
+- 인프라 단순화
+- 비용 효율적
+- 자동 확장
+- 모니터링 용이
+- 서버 관리 불필요
+
+---
+
+## Exception Log Table 설계
+
+누락 데이터 방지를 위해:
+
+- 별도 Exception Log Table 생성
+- 기록 항목:
+  - Execution ID
+  - Claim Identifier
+  - 에러 내용
+  - 발생 시간
+- 재처리 및 감사 대응 가능
+
+---
+
+# 🏗 아키텍처 개요
+
+## Hybrid 실시간 + Batch 구조
+
+```
+Stedi API
+    ↓
+초기 Bulk Ingestion
+    ↓
+Database
+    ↑
+Webhook Listener → 실시간 업데이트
+    ↑
+EventBridge (Daily)
+    ↓
+Batch Lambda
+    ↓
+Reconciliation Logic
+    ↓
+Database
+    ↓
+Claim Lifecycle UI
 ```
 
 ---
 
-## 🔄 Core Data Flow
+# 🔄 데이터 처리 흐름
 
-### 1️⃣ 837 – Claim Submission / 청구 제출
+## 실시간 경로
 
-- Creates `ClaimInfo`  
-- Initial status: **SUBMITTED**
+- Webhook으로 277 / 835 수신
+- 즉시 DB 반영
+- 라이프사이클 타임라인 갱신
 
-### 2️⃣ 277 – Claim Status Update / 상태 업데이트
+## Batch 경로 (하루 1회)
 
-- Arrives via Webhook or WebJob  
-- Uses `CategoryCode + StatusCode`  
+- Stedi API 호출
+- Watermark 기준 필터링
+- 중복 제거
+- DB 저장
+- Watermark 업데이트
 
-Deduplicated by:
+보장 사항:
 
-```
-(ClaimInfoId, CategoryCode, StatusCode)
-```
-
-### 3️⃣ 835 – ERA Payment / 지급 처리
-
-- Contains payment & adjustment data  
-- Business status derived from payment amounts  
-
-Deduplicated by:
-
-```
-(ClaimInfoId, StatusCode)
-```
+- Eventual Consistency
+- 누락 이벤트 복구
+- 완전한 라이프사이클 추적
 
 ---
 
-## Matching Strategy
+# 🎯 프로젝트 성과 (Impact)
 
-Deterministic Keys:
-
-```
-Subscriber First Name
-+ Subscriber Last Name
-+ Member ID
-```
-
-- Consistent across 837 / 277 / 835  
-- Independent of payer-specific identifiers  
-- Reliable cross-transaction correlation  
+- 대규모 트래픽 안정적 처리
+- 누락 데이터 제거
+- 운영 리스크 감소
+- 모니터링 가시성 향상
+- 평균 4초 응답 시간 유지
+- 1000개 이상 조직 지원 가능
 
 ---
 
-## ⚙ Implementation Details | 구현 상세
-
-### Batch Processing (My Contribution)
-
-- Scheduled WebJobs  
-- Backfill logic for missed webhook events  
-- Idempotent write design  
-- Policy-based deduplication  
-- Historical reprocessing safety  
-
-### Real-Time Processing (Teammate)
-
-- Webhook endpoints  
-- Payload validation  
-- Immediate persistence  
-- Latency reduction  
-
----
-
-## Data Model (Simplified) 
-
-```mermaid
-classDiagram
-    ClaimInfo <|-- ClaimStatus
-
-    class ClaimInfo {
-        Id
-        SubscriberFirstName
-        SubscriberLastName
-        MemberId
-        PatientControlNumber
-        CreatedAt
-    }
-
-    class ClaimStatus {
-        Id
-        ClaimInfoId
-        Source
-        CategoryCode
-        StatusCode
-        PaidAmount
-        ChargedAmount
-        TraceNumber
-        CreatedAt
-    }
-```
-
----
-
-## Tech Stack
+# 🛠 기술 스택
 
 ### Backend
 - ASP.NET Core
 - C#
 - Entity Framework Core
-- Azure WebJobs
-- Webhook APIs
-- AWS Lambda
+- AWS Lambda (.NET)
+- Amazon EventBridge
 
 ### Integration
-- EDI (X12 837 / 277 / 835)
 - Stedi API
+- X12 EDI (837 / 277 / 835)
 
 ### Database
 - MySQL
-- DynamoDB  
-- Indexed deduplication keys  
-- Immutable history model  
+- DynamoDB
+- 최적화된 Index 전략
+- Exception Log Table
 
 ---
 
-## Key Engineering Decisions
+# 📌 이 프로젝트가 보여주는 것
 
-1. **Webhook + WebJob Hybrid Architecture**  
-   - Real-time responsiveness  
-   - Guaranteed eventual consistency  
-
-2. **Immutable Status History**  
-   - Full audit trail  
-   - Easy investigation  
-
-3. **Policy-Based Deduplication**  
-   - Centralized logic  
-   - Extensible design  
-
-4. **Batch-Oriented DB Writes**  
-   - Performance optimized  
-   - Safe for large volumes  
-
----
-
-## Results
-
-- Reliable claim lifecycle tracking  
-- Accurate payment reconciliation  
-- Reduced operational overhead  
-- Clear audit trail  
-- Scalable ingestion architecture  
-
----
-
-## 프로젝트 역량
-
-- Healthcare domain expertise  
-- Distributed system design  
-- Event-driven + batch hybrid architecture  
-- Backend reliability ownership  
-- Multi-developer collaboration  
-
----
-
-## Author Contribution
-
-- Designed batch reconciliation strategy  
-- Implemented WebJob ingestion pipeline  
-- Built deduplication and idempotency logic  
-- Co-developed backend APIs for UI consumption  
+- 대규모 의료 데이터 파이프라인 설계 능력
+- Hybrid Event-driven + Batch 아키텍처 설계
+- Watermark 기반 증분 처리 전략
+- Write-optimized DB 설계 경험
+- Serverless 인프라 설계 역량
+- Healthcare EDI 도메인 이해
+- 운영 안정성 중심의 시스템 설계
