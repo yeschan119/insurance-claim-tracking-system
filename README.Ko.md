@@ -52,27 +52,25 @@ Stedi 특성상 모든 데이터가 완전한 실시간으로 반영되지 않�
 
 이를 통해 **Eventual Consistency**를 보장하고 누락 데이터를 방지.
 
-## Tech Stack
+### Tech Stack
 
-### Backend
-- Angular
-- ASP.NET Core
-- C#, Typescript, HTML, CSS
-- Entity Framework Core
-- AWS Lambda (.NET)
-- Amazon EventBridge
+- Backend
+  - Angular
+  - ASP.NET Core
+  - C#, Typescript, HTML, CSS
+  - Entity Framework Core
+  - AWS Lambda (.NET)
+  - Amazon EventBridge
 
-### Integration
-- Stedi API
-- X12 EDI (837 / 277 / 835)
+- Integration
+  - Stedi API
+  - X12 EDI (837 / 277 / 835)
 
-### Database
-- MySQL
-- DynamoDB
-- Optimized index strategy
-- Exception logging table
-
----
+- Database
+  - MySQL
+  - DynamoDB
+  - Optimized index strategy
+  - Exception logging table
 ---
 
 # 👨‍💻 나의 역할
