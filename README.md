@@ -8,9 +8,9 @@ reliably manage medical claim submissions, adjudication status updates, and paym
 The system integrates **837 (Claim Submission), 277 (Claim Status), and 835 (ERA Payment)** transactions
 into a **single, traceable claim timeline**.
 
-**Team Size:** 2 Developers  
-**My Role:** Batch processing & data synchronization (WebJob)  
-**Teammate Role:** Real-time processing via Webhooks  
+**Team Size:** 2 Developers
+**My Role:** Batch processing & data synchronization (WebJob)
+**Teammate Role:** Real-time processing via Webhooks
 
 ---
 
