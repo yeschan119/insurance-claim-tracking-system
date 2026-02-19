@@ -19,9 +19,11 @@ The system integrates:
 into a unified lifecycle timeline that enables:
 
 - End-to-end claim traceability  
-- Real-time status visibility  
+- Real-time status visibility
 - Accurate payment reconciliation  
 - Audit-ready historical tracking
+
+<img width="1536" height="1024" alt="project3" src="https://github.com/user-attachments/assets/579211a4-6e2f-4e39-acf7-12f46075ca86" />
 
 ---
 
