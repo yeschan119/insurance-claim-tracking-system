@@ -5,8 +5,10 @@
 ---
 
 ## Project Overview
-
 This project is a large-scale **Insurance Claim Lifecycle Tracking & Monitoring System** built on top of the Stedi EDI platform.
+
+## 📌 What is Stedi?
+**Stedi** is a cloud-based platform that enables organizations to process healthcare and insurance **EDI (Electronic Data Interchange)** transactions through modern APIs.
 
 The system integrates:
 
