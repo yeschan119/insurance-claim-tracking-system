@@ -18,13 +18,13 @@ into a **single, traceable and immutable claim timeline**.
 
 The goal of the system is to guarantee:
 
-- End-to-end claim traceability
-- Accurate payment reconciliation
-- Operational reliability
-- Audit-ready historical tracking
+- End-to-end claim traceability  
+- Accurate payment reconciliation  
+- Operational reliability  
+- Audit-ready historical tracking  
 
 **Team Size:** 2 Developers  
-**My Role:** Batch processing & data synchronization (WebJob)  
+**My Role:** Batch processing & data synchronization  
 **Teammate Role:** Real-time processing via Webhooks  
 
 ---
@@ -66,15 +66,15 @@ This system:
 
 The system uses a **Webhook + Scheduled Batch Hybrid Architecture**.
 
-- Webhooks handle near real-time updates
-- Scheduled batch jobs guarantee reconciliation and completeness
+- Webhooks handle near real-time updates  
+- Scheduled batch jobs guarantee reconciliation and completeness  
 
 ---
 
 ## Scheduled Execution Architecture  
-### EventBridge → Lambda → WebJob (Daily Execution)
+### EventBridge → Batch Lambda → .NET Reconciliation Lambda (Daily Execution)
 
-To ensure historical correctness and reconciliation of missed events, batch processing runs automatically once per day using AWS scheduling infrastructure.
+To ensure historical correctness and reconciliation of missed events, batch processing runs automatically once per day using an AWS-native serverless architecture.
 
 ### Execution Flow
 
@@ -82,20 +82,21 @@ To ensure historical correctness and reconciliation of missed events, batch proc
    - Configured with a daily cron rule
    - Acts as the centralized scheduler
 
-2. **AWS Lambda**
+2. **Batch Trigger Lambda**
    - Invoked by EventBridge
-   - Securely triggers the Azure WebJob execution
-   - Handles execution context and validation
+   - Lightweight orchestration layer
+   - Responsible for invoking the reconciliation Lambda
 
-3. **Azure WebJob**
-   - Fetches updated EDI transactions
+3. **.NET Reconciliation Lambda**
+   - Contains the actual batch handler logic
+   - Fetches updated 837 / 277 / 835 transactions
    - Reconciles missed webhook events
-   - Performs deduplication
+   - Performs policy-based deduplication
    - Ensures idempotent persistence
 
 ---
 
-### Architecture Diagram
+## Architecture Diagram
 
 ```mermaid
 flowchart LR
@@ -104,9 +105,9 @@ flowchart LR
     C["Webhook Listener"] --> D["277 / 835 Events"]
     D --> E["Status Normalization"]
 
-    EB["Amazon EventBridge<br/>Daily Cron"] --> L["AWS Lambda<br/>Trigger Layer"]
-    L --> W["Azure WebJob<br/>Batch Reconciliation"]
-    W --> E
+    EB["Amazon EventBridge<br/>Daily Cron"] --> BL["Batch Trigger Lambda"]
+    BL --> DL[".NET Reconciliation Lambda"]
+    DL --> E
 
     E --> H["Claim Status Timeline"]
     H --> I["Reporting / UI"]
@@ -126,10 +127,11 @@ flowchart LR
 
 ### 2. 277 – Claim Status Update
 
-- Arrives via Webhook or WebJob
+- Arrives via Webhook or Reconciliation Lambda
 - Provides adjudication progress
 - Uses `CategoryCode + StatusCode`
-- Deduplicated by:
+
+Deduplicated by:
 
 ```
 (ClaimInfoId, CategoryCode, StatusCode)
@@ -139,10 +141,11 @@ flowchart LR
 
 ### 3. 835 – ERA Payment
 
-- Arrives via Webhook or WebJob
+- Arrives via Webhook or Reconciliation Lambda
 - Contains payment & adjustment data
 - Business status derived from payment amounts
-- Deduplicated by:
+
+Deduplicated by:
 
 ```
 (ClaimInfoId, StatusCode)
@@ -172,9 +175,10 @@ Chosen because:
 
 ### Batch Processing (My Contribution)
 
-- Implemented scheduled WebJob triggered daily via:
-  - Amazon EventBridge
-  - AWS Lambda invocation layer
+- Implemented daily batch reconciliation using:
+  - **Amazon EventBridge (cron scheduler)**
+  - **Batch Trigger Lambda (orchestration layer)**
+  - **.NET AWS Lambda (reconciliation handler)**
 - Designed policy-based deduplication
 - Implemented idempotent write logic
 - Built reconciliation logic for missed webhook events
@@ -240,11 +244,9 @@ Backend APIs were designed to consistently support both UI segments.
 - ASP.NET Core
 - C#
 - Entity Framework Core
-- Async / Parallel Processing
-- Azure WebJobs
-- Webhook APIs
-- AWS Lambda
+- AWS Lambda (.NET)
 - Amazon EventBridge
+- Webhook APIs
 
 ### Integration
 - EDI (X12 837 / 277 / 835)
@@ -264,10 +266,10 @@ Backend APIs were designed to consistently support both UI segments.
    - Real-time responsiveness
    - Guaranteed eventual consistency
 
-2. **EventBridge → Lambda → WebJob Trigger Model**
-   - Fully automated daily reconciliation
-   - Cloud-native scheduling
-   - Decoupled execution layers
+2. **EventBridge → Lambda Orchestration Model**
+   - Fully AWS-native scheduling
+   - Decoupled trigger and business logic layers
+   - Serverless and scalable execution model
 
 3. **Immutable Status History**
    - Full audit trail
@@ -301,16 +303,16 @@ Backend APIs were designed to consistently support both UI segments.
 - Distributed system design
 - Hybrid event-driven + batch architecture
 - Idempotent data engineering practices
-- Cross-cloud orchestration (AWS + Azure)
+- AWS serverless orchestration design
 - Strong backend ownership and reliability mindset
 
 ---
 
 ## Author Contribution Summary
 
-- Designed batch reconciliation strategy
-- Architected EventBridge → Lambda → WebJob execution pipeline
-- Implemented idempotent ingestion architecture
+- Designed overall batch reconciliation strategy
+- Architected EventBridge → Lambda orchestration pipeline
+- Implemented .NET reconciliation Lambda handler
 - Built centralized deduplication policy logic
 - Developed reconciliation and backfill mechanisms
 - Co-developed backend APIs for UI consumption
