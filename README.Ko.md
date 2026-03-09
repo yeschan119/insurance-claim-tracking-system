@@ -9,7 +9,7 @@
 
 이 프로젝트는 **Stedi EDI 플랫폼 기반 보험 청구 라이프사이클 추적 및 모니터링 시스템**이다.
 
-Stedi는 의료 및 보험 산업에서 사용되는 **EDI (Electronic Data Interchange)** 트랜잭션을 API 기반으로 처리할 수 있도록 제공하는 클라우드 플랫폼이다.
+Stedi는 미국 의료 및 보험 산업에서 사용되는 **EDI (Electronic Data Interchange)** 트랜잭션을 API 기반으로 처리할 수 있도록 제공하는 클라우드 플랫폼이다.
 
 본 시스템은 다음 EDI 트랜잭션을 통합한다.
 
